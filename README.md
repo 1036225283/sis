@@ -1,22 +1,24 @@
 # sis
 sql is service 简称sis
 >简要说明
+```JAVA
 1.无论是hibernate还是mybatis，使用起来都不是很方便，在当今微服务横行的情况下，我们需要更方便更快捷的构建服务
 2.还在为读写分离，一主多从负载均衡而发愁，还在为了分库分表而头疼，sis满足你的需求
-
+```
 >内部构成
-###DBHelper
+```JAVA
+DBHelper
     负责读取tbDataSource和tbSql的数据
     
- ##UtilSql
+UtilSql
     sql执行的辅助工具类
- ##DataSource
+DataSource
     负责加载sql和数据源，并在执行sql时，如果该sql涉及分库分表，会计算并找到正确的库跟表，进行数据操作
     同时提供了3种操作，getList,getMap,update
     getList 获取多条数据，返回结果：List<Map<String, Object>>
     getMap  获取单条数据，返回结果：Map<String, Object>
     update  执行更新和删除操作，返回结果，影响数据的条数
-    
+```
     
 
 >初始化工作
