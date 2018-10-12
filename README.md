@@ -65,6 +65,7 @@ CREATE UNIQUE INDEX tbSql_strKey_uindex ON tbSql (strKey);
 ```
 
 >举个例子说明一般的使用情形
+
 tbSql.strKey:           getBorrowerByUserId
 tbSql.strSql:           SELECT * FROM tbBorrower WHERE lUserId = {lUserId};
 tbSql.strParam:         lUserId
