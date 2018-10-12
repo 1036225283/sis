@@ -65,14 +65,14 @@ CREATE UNIQUE INDEX tbSql_strKey_uindex ON tbSql (strKey);
 ```
 
 >举个例子说明一般的使用情形
-
+```JAVA
 tbSql.strKey:           getBorrowerByUserId
 tbSql.strSql:           SELECT * FROM tbBorrower WHERE lUserId = {lUserId};
 tbSql.strParam:         lUserId
 tbSql.strResultType:    map
 tbSql.strDataSource:    borrowerDataSource,对应tbDataSource.strKey
 tbSql.strDataGroup:     5:100:50000:lUserId,意思是5库100表，每个表存放50000个用户的数据，根据lUserId来进行分库分表，如果单库单表则为""
-
+```
 
 >Java中如何调用
 ```JAVA
