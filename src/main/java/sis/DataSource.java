@@ -16,7 +16,7 @@ public class DataSource {
     private DBHelper dbHelper = null;
 
 
-    static DataSource dataSource = new DataSource();
+    static DataSource dataSource;
 
 
     public static DataSource getDataSource() {
@@ -366,5 +366,10 @@ public class DataSource {
         int nTableIndex = nKey / nCapacity;
         int nDbIndex = nTableIndex / nTableCount;
         return strDataSource + nDbIndex;
+    }
+
+
+    public static void setDataSource(DataSource dataSourceInt) {
+        dataSource = dataSourceInt;
     }
 }
