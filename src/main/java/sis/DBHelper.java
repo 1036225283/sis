@@ -21,7 +21,9 @@ public class DBHelper {
     public void close() {
         System.out.println("Close connection...");
         try {
-            this.conn.close();
+            if (this.conn != null && !this.conn.isClosed()) {
+                this.conn.close();
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();

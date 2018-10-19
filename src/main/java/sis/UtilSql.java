@@ -204,43 +204,77 @@ public class UtilSql {
         }
     }
 
-    public static List<Map<String, Object>> getList(String sql, Connection connection, String[] params) throws SQLException {
+    //进行预编译的处理
+    public static List<Map<String, Object>> getList(String sql, Connection connection, String[] params, Object[] values) throws SQLException {
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+
             for (int i = 0; i < params.length; i++) {
-                statement.setString(i, params[i]);
+                sql = sql.replace("{" + params[i] + "}", "?").replace("'?'", "?");
             }
-            System.out.println("getList : " + sql);
-            long start = System.nanoTime();
-            ResultSet resultSet = statement.executeQuery(sql);// 执行语句，得到结果集
-            long end = System.nanoTime();
-            System.out.println("毫秒：" + (end - start) / 1000 / 1000 + "，微秒：" + (end - start) / 1000);
+
+            PreparedStatement statement = connection.prepareStatement(sql);
+            for (int i = 0; i < values.length; i++) {
+                statement.setObject(i + 1, values[i]);
+            }
+
+            System.out.println("getList : " + statement.toString());
+            ResultSet resultSet = statement.executeQuery();// 执行语句，得到结果集
             return getList(resultSet);
+        } catch (Exception e) {
+            return null;
         } finally {
             connection.close();
         }
 
     }
 
-    public static Map<String, Object> getUnique(String sql, Connection connection, String[] params) throws SQLException {
+    //进行预编译的处理
+    public static Map<String, Object> getUnique(String sql, Connection connection, String[] params, Object[] values) throws SQLException {
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+
             for (int i = 0; i < params.length; i++) {
-                statement.setString(i, params[i]);
+                sql = sql.replace("{" + params[i] + "}", "?").replace("'?'", "?");
             }
-            ResultSet resultSet = statement.executeQuery(sql);// 执行语句，得到结果集
+
+            PreparedStatement statement = connection.prepareStatement(sql);
+            for (int i = 0; i < values.length; i++) {
+                statement.setObject(i + 1, values[i]);
+            }
+
+            System.out.println("getMap : " + statement.toString());
+            ResultSet resultSet = statement.executeQuery();// 执行语句，得到结果集
             return getUnique(resultSet);
+        } catch (Exception e) {
+            return null;
         } finally {
             connection.close();
         }
-
     }
 
-    // 计算数据源url
-    public static String getUrl(String url, int hosts, int dbs, int tableSize) {
 
-        return null;
+    //进行预编译的处理
+    public static int executeUpdate(String sql, Connection connection, String[] params, Object[] values) throws SQLException {
+
+        try {
+
+            for (int i = 0; i < params.length; i++) {
+                sql = sql.replace("{" + params[i] + "}", "?").replace("'?'", "?");
+            }
+
+            PreparedStatement statement = connection.prepareStatement(sql);
+            for (int i = 0; i < values.length; i++) {
+                statement.setObject(i + 1, values[i]);
+            }
+
+            System.out.println("getMap : " + statement.toString());
+            return statement.executeUpdate();
+        } catch (Exception e) {
+            return -1;
+        } finally {
+            connection.close();
+        }
     }
+
 
     //将map的值组装到sql里面去
     public static int update(String sql, Connection connection, Map<String, Object> map) throws Exception {

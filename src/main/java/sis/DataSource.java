@@ -7,12 +7,15 @@ import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 /**
  * 数据操作
  */
 public class DataSource {
 
+
+    private Logger logger;
     private DBHelper dbHelper = null;
 
 
@@ -87,8 +90,18 @@ public class DataSource {
                 properties.setProperty("testOnBorrow", "true");
                 //分库分表时，多个数据源的处理 ,nDataGroup==1表示只有一个库
                 if (nDataGroup == 1) {
-                    BasicDataSource basicDataSource = BasicDataSourceFactory.createDataSource(properties);
-                    listBasicDataSource.add(basicDataSource);
+                    try {
+                        BasicDataSource basicDataSource = BasicDataSourceFactory.createDataSource(properties);
+                        listBasicDataSource.add(basicDataSource);
+                    } catch (Exception e) {
+                        if (logger != null) {
+                            logger.info(e.getMessage());
+                            logger.info(strUrl);
+                        }
+                        System.out.println(e.getMessage());
+                        System.out.println(strUrl);
+                    }
+
                 } else {
 
                     for (int i = 0; i < nDataGroup; i++) {
@@ -97,8 +110,18 @@ public class DataSource {
                         String strSuffix = strUrl.substring(strUrl.indexOf("."), strUrl.length());
                         String strRealUrl = strPrefix + i + strSuffix;
                         properties.setProperty("url", strRealUrl);
-                        BasicDataSource basicDataSource = BasicDataSourceFactory.createDataSource(properties);
-                        listBasicDataSource.add(basicDataSource);
+                        try {
+                            BasicDataSource basicDataSource = BasicDataSourceFactory.createDataSource(properties);
+                            listBasicDataSource.add(basicDataSource);
+                        } catch (Exception e) {
+                            if (logger != null) {
+                                logger.info(e.getMessage());
+                                logger.info(strUrl);
+                            }
+                            System.out.println(e.getMessage());
+                            System.out.println(strUrl);
+                        }
+
                     }
                 }
 
@@ -181,20 +204,22 @@ public class DataSource {
     }
 
     //带参数查询array
-    public List<Map<String, Object>> getList(String strServiceName, String... arrParam) throws Exception {
+    public List<Map<String, Object>> getList(String strServiceName, Object... arrParam) throws Exception {
         Map<String, Object> map = mapSql.get(strServiceName);
         String strDataSource = map.get("strDataSource").toString();
         String strDataGroup = map.get("strDataGroup").toString();
-        String sql = getSqlFromArray(map, arrParam);
+        String sql = map.get("strSql").toString();
 
-        if ("".equals(strDataGroup)) {
-            return UtilSql.getList(sql, getConnection(strDataSource));
+        if (!"".equals(strDataGroup)) {
+            strDataSource = getDataGroupDataSourceKeyFromArray(strDataSource, strDataGroup, arrParam);
+            String strTable = map.get("strTable").toString();
+            sql = getDataGroupSqlFromArray(strDataGroup, strTable, sql, arrParam);
         }
 
-        String strTable = map.get("strTable").toString();
-        sql = getDataGroupSqlFromArray(strDataGroup, strTable, sql, arrParam);
-        strDataSource = getDataGroupDataSourceKeyFromArray(strDataSource, strDataGroup, arrParam);
-        return UtilSql.getList(sql, getConnection(strDataSource));
+        String params = map.get("strParam").toString();
+        String[] arrKey = params.split(",");
+
+        return UtilSql.getList(sql, getConnection(strDataSource), arrKey, arrParam);
 
     }
 
@@ -226,20 +251,22 @@ public class DataSource {
     }
 
     //带参数查询array
-    public Map<String, Object> getMap(String strServiceName, String... arrParam) throws Exception {
+    public Map<String, Object> getMap(String strServiceName, Object... arrParam) throws Exception {
         Map<String, Object> map = mapSql.get(strServiceName);
         String strDataSource = map.get("strDataSource").toString();
         String strDataGroup = map.get("strDataGroup").toString();
-        String sql = getSqlFromArray(map, arrParam);
+        String sql = map.get("strSql").toString();
 
-        if ("".equals(strDataGroup)) {
-            return UtilSql.getUnique(sql, getConnection(strDataSource));
+        if (!"".equals(strDataGroup)) {
+            strDataSource = getDataGroupDataSourceKeyFromArray(strDataSource, strDataGroup, arrParam);
+            String strTable = map.get("strTable").toString();
+            sql = getDataGroupSqlFromArray(strDataGroup, strTable, sql, arrParam);
         }
 
-        String strTable = map.get("strTable").toString();
-        sql = getDataGroupSqlFromArray(strDataGroup, strTable, sql, arrParam);
-        strDataSource = getDataGroupDataSourceKeyFromArray(strDataSource, strDataGroup, arrParam);
-        return UtilSql.getUnique(sql, getConnection(strDataSource));
+        String params = map.get("strParam").toString();
+        String[] arrKey = params.split(",");
+
+        return UtilSql.getUnique(sql, getConnection(strDataSource), arrKey, arrParam);
     }
 
 
@@ -271,21 +298,23 @@ public class DataSource {
     }
 
     //带参数更新array
-    public int update(String strServiceName, String... arrParam) throws Exception {
+    public int update(String strServiceName, Object... arrParam) throws Exception {
         Map<String, Object> map = mapSql.get(strServiceName);
         String strDataSource = map.get("strDataSource").toString();
         String strDataGroup = map.get("strDataGroup").toString();
-        String sql = getSqlFromArray(map, arrParam);
-        System.out.println(sql);
+        String sql = map.get("strSql").toString();
 
-        if ("".equals(strDataGroup)) {
-            return UtilSql.executeUpdate(sql, getConnection(strDataSource));
+
+        if (!"".equals(strDataGroup)) {
+            strDataSource = getDataGroupDataSourceKeyFromArray(strDataSource, strDataGroup, arrParam);
+            String strTable = map.get("strTable").toString();
+            sql = getDataGroupSqlFromArray(strDataGroup, strTable, sql, arrParam);
         }
 
-        String strTable = map.get("strTable").toString();
-        sql = getDataGroupSqlFromArray(strDataGroup, strTable, sql, arrParam);
-        strDataSource = getDataGroupDataSourceKeyFromArray(strDataSource, strDataGroup, arrParam);
-        return UtilSql.executeUpdate(sql, getConnection(strDataSource));
+        String params = map.get("strParam").toString();
+        String[] arrKey = params.split(",");
+
+        return UtilSql.executeUpdate(sql, getConnection(strDataSource), arrKey, arrParam);
 
     }
 
@@ -342,12 +371,12 @@ public class DataSource {
     }
 
 
-    private String getDataGroupSqlFromArray(String strDataGroup, String strTable, String sql, String... arrParam) {
+    private String getDataGroupSqlFromArray(String strDataGroup, String strTable, String sql, Object... arrParam) {
         //strDataGroup = 5:100:50000:lUserId 意思是5库100表每
         String[] arrDataGroup = strDataGroup.split(":");
         int nCapacity = Integer.valueOf(arrDataGroup[2]);
 
-        String strKey = arrParam[0];
+        String strKey = arrParam[0].toString();
         int nKey = Integer.valueOf(strKey);
 
         int nTableIndex = nKey / nCapacity;
@@ -356,13 +385,13 @@ public class DataSource {
 
     }
 
-    private String getDataGroupDataSourceKeyFromArray(String strDataSource, String strDataGroup, String... arrParam) {
+    private String getDataGroupDataSourceKeyFromArray(String strDataSource, String strDataGroup, Object... arrParam) {
 
         String[] arrDataGroup = strDataGroup.split(":");
         int nTableCount = Integer.valueOf(arrDataGroup[1]);
         int nCapacity = Integer.valueOf(arrDataGroup[2]);
-        String strKey = arrParam[0];
-        int nKey = Integer.valueOf(strKey);
+        Object strKey = arrParam[0];
+        int nKey = Integer.valueOf(strKey.toString());
         int nTableIndex = nKey / nCapacity;
         int nDbIndex = nTableIndex / nTableCount;
         return strDataSource + nDbIndex;
@@ -371,5 +400,9 @@ public class DataSource {
 
     public static void setDataSource(DataSource dataSourceInt) {
         dataSource = dataSourceInt;
+    }
+
+    public void setLogger(Logger logger) {
+        this.logger = logger;
     }
 }
