@@ -1,15 +1,15 @@
 # sis
 sql is service 简称sis
+
 >简要说明
 ```JAVA
 1.无论是hibernate还是mybatis，使用起来都不是很方便，在当今微服务横行的情况下，我们需要更方便更快捷的构建服务
 2.还在为读写分离，一主多从负载均衡而发愁，还在为了分库分表而头疼，sis满足你的需求
 ```
->内部构成
+>Class介绍
 ```JAVA
 DBHelper
     负责读取tbDataSource和tbSql的数据
-    
 UtilSql
     sql执行的辅助工具类
 DataSource
@@ -18,10 +18,26 @@ DataSource
     getList 获取多条数据，返回结果：List<Map<String, Object>>
     getMap  获取单条数据，返回结果：Map<String, Object>
     update  执行更新和删除操作，返回结果，影响数据的条数
+Return
+    返回对象，有getCode() getList() getMap() 等方法
+SqlManager
+    用来查找sql服务
+HandlerManager
+    用来查找java程序服务
+ServiceManager
+    用来查找远程服务
+HandlerClient
+    服务调用入口：一次调用SqlManager，如果没有找到服务，再次调用HandlerManager，如果还是没有找到，最后在调用ServiceManager
+    
 ```
     
 
 >初始化工作
+设置环境变量
+#sis
+export sis_username='你的数据库账户'
+export sis_password='你的数据库密码'
+export sis_url='你的数据库连接'
 需要在数据里面建两张表
 ```SQL
 //记录数据源信息
@@ -76,34 +92,30 @@ tbSql.strDataSource:    borrowerDataSource,对应tbDataSource.strKey
 tbSql.strDataGroup:     5:100:50000:lUserId,意思是5库100表，每个表存放50000个用户的数据，根据lUserId来进行分库分表，如果单库单表则为""
 ```
 
->Java中如何调用
+>### Java中如何调用
+> 直接对sql执行调用
+传入sqlServiceName和参数即可
 ```JAVA
-        DBHelper dbHelper = new DBHelper();
-
-        String url = "jdbc:mysql://localhost:3306/test?zeroDateTimeBehavior=convertToNull&Unicode=true&amp;characterEncoding=utf8";
-        String user = "root";
-        String password = "root";
-        dbHelper.setUser(user);
-        dbHelper.setPassword(password);
-        dbHelper.setDriverClassName("com.mysql.jdbc.Driver");
-        dbHelper.setUrl(url);
-
-
-        DataSource dataSource = new DataSource();
-        dataSource.switchDbHelper(dbHelper);
-        dataSource.init();
         
         //如果调用没有参数的sql
-        List<Map<String, Object>> list = dataSource.getList("listUser");
-        Map<String, Object> map = dataSource.getMap("getUser");
-        int count = dataSource.update("updateUser");
+        List<Map<String, Object>> list = DataSource.getDataSource().getList("listUser");
+        Map<String, Object> map = DataSource.getDataSource().getMap("getUser");
+        int count = DataSource.getDataSource().update("updateUser");
         
         //如果有参数呢
-        List<Map<String, Object>> list = dataSource.getList("listUser", nAge, strMobile);
-        Map<String, Object> map = dataSource.getMap("getUser", "5898823");
-        int count = dataSource.update("updateUser", lUserId, nAge);
+        List<Map<String, Object>> list = DataSource.getDataSource().getList("listUser", nAge, strMobile);
+        Map<String, Object> map = DataSource.getDataSource().getMap("getUser", "5898823");
+        int count = DataSource.getDataSource().update("updateUser", lUserId, nAge);
+```
+
+> 服务形式调用
+```JAVA
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        reqStock.put("strAction", "getUser");
+        reqStock.put("lUserId", 32423423);
+        Return ret = HandlerClient.instance.handler(reqStock);
+        System.out.println(ret.getMap());
 
 ```
 
->是不是特别简单，但每次调用时，有的有参数，有的没有参数，这算不上是微服务，微服务可是一次编写，处处调用，所以调用的接口应该是一致的，统一的
-
+>是不是特别简单
