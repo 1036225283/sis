@@ -26,10 +26,10 @@ public class SqlManager implements Handler {
                     //判断参数是否存在
                     String strParamFromMysql = service.get("strParam").toString();
 
-                    String[] objects = null;
+                    Object[] objects = null;
                     if (!"".equals(strParamFromMysql)) {
                         String[] strParams = strParamFromMysql.split(",");
-                        objects = new String[strParams.length];
+                        objects = new Object[strParams.length];
                         if (strParams.length != 0) {
                             for (int i = 0; i < strParams.length; i++) {
                                 String strParam = strParams[i];
@@ -39,7 +39,7 @@ public class SqlManager implements Handler {
                                 if (!map.containsKey(strParam)) {
                                     return Return.Error(strParam + " not exist");
                                 }
-                                objects[i] = map.get(strParam).toString();
+                                objects[i] = map.get(strParam);
                             }
                         }
                     }

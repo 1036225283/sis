@@ -10,25 +10,65 @@ import java.util.Map;
  */
 public class Test {
 
-
-    public static void main(String[] args) throws Exception {
-
-
-        Map<String, Object> reqStock = new HashMap<String, Object>();
-        reqStock.put("strAction", "getBaiduCode");
-        reqStock.put("strCode", "002222");
-        Return ret = HandlerClient.instance.handler(reqStock);
-
-        System.out.println(ret.getMap());
-
-
+    static {
+        HandlerManager.instance.regisger("last", new Handler() {
+            public Return handler(Map<String, Object> map) {
+                return Return.Error("this is last");
+            }
+        });
     }
 
-    public void testSqlDataSource() throws Exception {
+    public static void main(String[] args) throws Exception {
+//        testHandlerManager();
+        testSqlManager();
+    }
+
+    public static void testSqlDataSource() throws Exception {
         List<Map<String, Object>> list = DataSource.getDataSource().getList("limitStockDayByCodeByDate", "002222", "2018-10-10", 11);
         System.out.println(list.size());
         Map<String, Object> map = DataSource.getDataSource().getMap("getBaiduCode", "002222");
         System.out.println(map);
+    }
+
+
+    public static void testHandlerManager() {
+        HandlerManager.instance.regisger("test", new Handler() {
+            public Return handler(Map<String, Object> map) {
+                return Return.Error("this is test");
+            }
+        });
+
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        reqStock.put("strAction", "last");
+        reqStock.put("strCode", "002222");
+        Return ret = HandlerManager.instance.handler(reqStock);
+        System.out.println(ret.getMsg());
+    }
+
+
+    public static void testClientHandler() {
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        reqStock.put("strAction", "getUser");
+        reqStock.put("lUserId", 32423423);
+        Return ret = HandlerClient.instance.handler(reqStock);
+        System.out.println(ret.getMap());
+    }
+
+
+    public static void testSqlManager() {
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        reqStock.put("strAction", "limitStockExtend");
+        reqStock.put("strFlag", "nDayInfoFlag");
+        reqStock.put("strValue", 0);
+        reqStock.put("limit", 30);
+        Return ret = HandlerClient.instance.handler(reqStock);
+        if (ret.getCode() != 0) {
+            System.out.println(ret.getMsg());
+        }
+
+        //拼装编码，然后从网易查询数据
+        List<Map<String, Object>> list = ret.getList();
+        System.out.println(list);
     }
 
 
