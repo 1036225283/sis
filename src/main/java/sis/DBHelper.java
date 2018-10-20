@@ -4,6 +4,7 @@ package sis;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Map;
 
 public class DBHelper {
 
@@ -15,7 +16,21 @@ public class DBHelper {
     private Connection conn = null;
 
     public DBHelper() {
+        Map<String, String> map = System.getenv();
+        if (!map.containsKey("sis_username")) {
+            throw new RuntimeException("sis_username not found from system env");
+        }
+        if (!map.containsKey("sis_password")) {
+            throw new RuntimeException("sis_username not found from system env");
+        }
+        if (!map.containsKey("sis_url")) {
+            throw new RuntimeException("sis_username not found from system env");
+        }
 
+        url = map.get("sis_url");
+        user = map.get("sis_username");
+        password = map.get("sis_password");
+        strDriverClassName = "com.mysql.jdbc.Driver";
     }
 
     public void close() {

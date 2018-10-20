@@ -16,10 +16,20 @@ public class DataSource {
 
 
     private Logger logger;
-    private DBHelper dbHelper = null;
+    private DBHelper dbHelper = new DBHelper();
 
 
-    static DataSource dataSource;
+    static DataSource dataSource = new DataSource();
+
+    public DataSource() {
+
+        try {
+            this.init();
+        } catch (Exception e) {
+            throw new RuntimeException("dataSource.init is failure");
+        }
+
+    }
 
 
     public static DataSource getDataSource() {
@@ -159,7 +169,7 @@ public class DataSource {
     }
 
     //获取sql，根据param array 来构建参数
-    private String getSqlFromArray(Map<String, Object> map, String... strParams) {
+    private String getSqlFromArray(Map<String, Object> map, Object... strParams) {
         String sql = map.get("strSql").toString();
         String params = map.get("strParam").toString();
         String[] arrParam = params.split(",");
@@ -167,7 +177,7 @@ public class DataSource {
             if (strParams == null) {
                 return sql;
             }
-            sql = sql.replace("{" + arrParam[i] + "}", strParams[i]);
+            sql = sql.replace("{" + arrParam[i] + "}", strParams[i].toString());
         }
         return sql;
     }

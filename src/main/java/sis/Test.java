@@ -1,5 +1,6 @@
 package sis;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,22 +13,22 @@ public class Test {
 
     public static void main(String[] args) throws Exception {
 
-        DBHelper dbHelper = new DBHelper();
 
-        dbHelper.setUser("root");
-        dbHelper.setPassword("root");
-        dbHelper.setDriverClassName("com.mysql.jdbc.Driver");
-        dbHelper.setUrl("jdbc:mysql://localhost:3306/mysql?zeroDateTimeBehavior=convertToNull&Unicode=true&amp;characterEncoding=utf8");
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        reqStock.put("strAction", "getBaiduCode");
+        reqStock.put("strCode", "002222");
+        Return ret = HandlerClient.instance.handler(reqStock);
+
+        System.out.println(ret.getMap());
 
 
-        DataSource dataSource = new DataSource();
-        dataSource.switchDbHelper(dbHelper);
-        dataSource.init();
+    }
 
-        List<Map<String, Object>> list = dataSource.getList("getStock");
-
-        System.out.println(list);
-
+    public void testSqlDataSource() throws Exception {
+        List<Map<String, Object>> list = DataSource.getDataSource().getList("limitStockDayByCodeByDate", "002222", "2018-10-10", 11);
+        System.out.println(list.size());
+        Map<String, Object> map = DataSource.getDataSource().getMap("getBaiduCode", "002222");
+        System.out.println(map);
     }
 
 
