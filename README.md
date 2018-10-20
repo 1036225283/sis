@@ -34,10 +34,13 @@ HandlerClient
 
 >初始化工作
 设置环境变量
+```JAVA
 #sis
 export sis_username='你的数据库账户'
 export sis_password='你的数据库密码'
 export sis_url='你的数据库连接'
+```
+
 需要在数据里面建两张表
 ```SQL
 //记录数据源信息
