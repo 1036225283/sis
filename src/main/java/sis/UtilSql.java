@@ -213,8 +213,10 @@ public class UtilSql {
             }
 
             PreparedStatement statement = connection.prepareStatement(sql);
-            for (int i = 0; i < values.length; i++) {
-                statement.setObject(i + 1, values[i]);
+            if (values != null) {
+                for (int i = 0; i < values.length; i++) {
+                    statement.setObject(i + 1, values[i]);
+                }
             }
 
             System.out.println("getList : " + statement.toString());
