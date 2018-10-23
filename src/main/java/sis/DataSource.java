@@ -2,12 +2,13 @@ package sis;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbcp2.BasicDataSourceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 
 /**
  * 数据操作
@@ -15,19 +16,19 @@ import java.util.logging.Logger;
 public class DataSource {
 
 
-    private Logger logger;
+    private static final Logger logger = LoggerFactory.getLogger(DataSource.class);
     private DBHelper dbHelper = new DBHelper();
 
 
     static DataSource dataSource = new DataSource();
 
     public DataSource() {
-
         try {
             this.init();
         } catch (Exception e) {
-            throw new RuntimeException("dataSource.init is failure");
+            e.printStackTrace();
         }
+
 
     }
 
@@ -62,85 +63,51 @@ public class DataSource {
 
     //初始化，读取数据源。
     private void loadDataSource() throws Exception {
+
+        logger.info("load dataSource is start ...");
+
         List<Map<String, Object>> list = UtilSql.getListSelf("SELECT * FROM tbDataSource;", dbHelper.getConnection());
         for (Map<String, Object> map : list) {
 
-            List<BasicDataSource> listBasicDataSource = new ArrayList<BasicDataSource>();
 
             String strKey = map.get("strKey").toString();
             String strDataGroup = map.get("strDataGroup").toString();
             int nDataGroup = Integer.valueOf(strDataGroup);
 
-            String strConnectionProperties = map.get("strConnectionProperties").toString();
-            String nIsolation = map.get("nIsolation").toString();
-
             //一主多从时多个数据源的加载
             String strUrls = map.get("strUrl").toString();
             String[] arrUrl = strUrls.split(",");
-            for (String strUrl : arrUrl) {
 
-                Properties properties = new Properties();
-                properties.setProperty("username", map.get("strUsername").toString());
-                properties.setProperty("password", map.get("strPassword").toString());
-                properties.setProperty("url", strUrl);
-                properties.setProperty("driverClassName", map.get("strDriverClassName").toString());
-                properties.setProperty("minIdle", map.get("nMinIdle").toString());
-                properties.setProperty("maxIdle", map.get("nMaxIdle").toString());
-                properties.setProperty("maxTotal", map.get("nMaxTotal").toString());
-                properties.setProperty("initialSize", map.get("nInitialSize").toString());
-                properties.setProperty("maxWaitMillis", map.get("nMaxWaitMillis").toString());
-                properties.setProperty("testWhileIdle", "true");
-                properties.setProperty("timeBetweenEvictionRunsMillis", "10000");
-                properties.setProperty("numTestsPerEvictionRun", "3");
-                properties.setProperty("removeAbandonedOnBorrow", "true");
-                properties.setProperty("removeAbandonedOnMaintenance", "true");
-                properties.setProperty("removeAbandonedTimeout", "300");
-                properties.setProperty("validationQuery", "SELECT 1");
-                properties.setProperty("testOnReturn", "false");
-                properties.setProperty("testOnBorrow", "true");
-                //分库分表时，多个数据源的处理 ,nDataGroup==1表示只有一个库
-                if (nDataGroup == 1) {
-                    try {
-                        BasicDataSource basicDataSource = BasicDataSourceFactory.createDataSource(properties);
-                        listBasicDataSource.add(basicDataSource);
-                    } catch (Exception e) {
-                        if (logger != null) {
-                            logger.info(e.getMessage());
-                            logger.info(strUrl);
-                        }
-                        System.out.println(e.getMessage());
-                        System.out.println(strUrl);
-                    }
-
-                } else {
-
-                    for (int i = 0; i < nDataGroup; i++) {
-                        //对strUrl进行处理
+            //先判断是否分库分表
+            if (nDataGroup == 1) {
+                List<BasicDataSource> listBasicDataSource = new ArrayList<BasicDataSource>();
+                for (String strUrl : arrUrl) {
+                    logger.info(strKey + " : " + strUrl);
+                    BasicDataSource basicDataSource = createDataSource(map, strKey, strUrl);
+                    listBasicDataSource.add(basicDataSource);
+                }
+                mapDataSource.put(strKey, listBasicDataSource);
+                mapDataSourceIndex.put(strKey, new AtomicInteger(0));
+            } else {
+                for (int i = 0; i < nDataGroup; i++) {
+                    String strKeyNew = strKey + i;
+                    List<BasicDataSource> listBasicDataSource = new ArrayList<BasicDataSource>();
+                    for (String strUrl : arrUrl) {
                         String strPrefix = strUrl.substring(0, strUrl.indexOf("."));
                         String strSuffix = strUrl.substring(strUrl.indexOf("."), strUrl.length());
                         String strRealUrl = strPrefix + i + strSuffix;
-                        properties.setProperty("url", strRealUrl);
-                        try {
-                            BasicDataSource basicDataSource = BasicDataSourceFactory.createDataSource(properties);
-                            listBasicDataSource.add(basicDataSource);
-                        } catch (Exception e) {
-                            if (logger != null) {
-                                logger.info(e.getMessage());
-                                logger.info(strUrl);
-                            }
-                            System.out.println(e.getMessage());
-                            System.out.println(strUrl);
-                        }
-
+                        logger.info(strKeyNew + " : " + strRealUrl);
+                        BasicDataSource basicDataSource = createDataSource(map, strKeyNew, strRealUrl);
+                        listBasicDataSource.add(basicDataSource);
                     }
+                    mapDataSource.put(strKeyNew, listBasicDataSource);
+                    mapDataSourceIndex.put(strKeyNew, new AtomicInteger(0));
                 }
-
-
             }
 
-            mapDataSource.put(strKey, listBasicDataSource);
-            mapDataSourceIndex.put(strKey, new AtomicInteger(0));
         }
+
+        logger.info("load dataSource is end ...");
     }
 
     Thread shutdownThread = new Thread() {
@@ -408,11 +375,39 @@ public class DataSource {
     }
 
 
+    //根据urls创建数据源
+    public BasicDataSource createDataSource(Map<String, Object> map, String strKey, String strUrl) throws Exception {
+
+        List<BasicDataSource> listBasicDataSource = new ArrayList<BasicDataSource>();
+
+
+        Properties properties = new Properties();
+        properties.setProperty("username", map.get("strUsername").toString());
+        properties.setProperty("password", map.get("strPassword").toString());
+        properties.setProperty("url", strUrl);
+        properties.setProperty("driverClassName", map.get("strDriverClassName").toString());
+        properties.setProperty("minIdle", map.get("nMinIdle").toString());
+        properties.setProperty("maxIdle", map.get("nMaxIdle").toString());
+        properties.setProperty("maxTotal", map.get("nMaxTotal").toString());
+        properties.setProperty("initialSize", map.get("nInitialSize").toString());
+        properties.setProperty("maxWaitMillis", map.get("nMaxWaitMillis").toString());
+        properties.setProperty("testWhileIdle", "true");
+        properties.setProperty("timeBetweenEvictionRunsMillis", "10000");
+        properties.setProperty("numTestsPerEvictionRun", "3");
+        properties.setProperty("removeAbandonedOnBorrow", "true");
+        properties.setProperty("removeAbandonedOnMaintenance", "true");
+        properties.setProperty("removeAbandonedTimeout", "300");
+        properties.setProperty("validationQuery", "SELECT 1");
+        properties.setProperty("testOnReturn", "false");
+        properties.setProperty("testOnBorrow", "true");
+        //分库分表时，多个数据源的处理 ,nDataGroup==1表示只有一个库
+        BasicDataSource basicDataSource = BasicDataSourceFactory.createDataSource(properties);
+        return basicDataSource;
+    }
+
+
     public static void setDataSource(DataSource dataSourceInt) {
         dataSource = dataSourceInt;
     }
 
-    public void setLogger(Logger logger) {
-        this.logger = logger;
-    }
 }

@@ -19,14 +19,16 @@ public class Test {
     }
 
     public static void main(String[] args) throws Exception {
+        testSqlDataSource();
 //        testHandlerManager();
-        testSqlManager();
+//        testClientHandler();
+//        testSqlManager();
     }
 
     public static void testSqlDataSource() throws Exception {
-        List<Map<String, Object>> list = DataSource.getDataSource().getList("limitStockDayByCodeByDate", "002222", "2018-10-10", 11);
-        System.out.println(list.size());
-        Map<String, Object> map = DataSource.getDataSource().getMap("getBaiduCode", "002222");
+//        List<Map<String, Object>> list = DataSource.getDataSource().getList("getUser", );
+//        System.out.println(list.size());
+        Map<String, Object> map = DataSource.getDataSource().getMap("getUser", 32232323);
         System.out.println(map);
     }
 
@@ -48,10 +50,9 @@ public class Test {
 
     public static void testClientHandler() {
         Map<String, Object> reqStock = new HashMap<String, Object>();
-        reqStock.put("strAction", "getUser");
-        reqStock.put("lUserId", 32423423);
+        reqStock.put("strAction", "listTaskUser");
         Return ret = HandlerClient.instance.handler(reqStock);
-        System.out.println(ret.getMap());
+        System.out.println(ret.getList());
     }
 
 
