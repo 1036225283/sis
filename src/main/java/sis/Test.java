@@ -23,12 +23,13 @@ public class Test {
 //        testHandlerManager();
 //        testClientHandler();
 //        testSqlManager();
+//        createSql();
     }
 
     public static void testSqlDataSource() throws Exception {
 //        List<Map<String, Object>> list = DataSource.getDataSource().getList("getUser", );
 //        System.out.println(list.size());
-        Map<String, Object> map = DataSource.getDataSource().getMap("getUser", 32232323);
+        Map<String, Object> map = DataSource.getDataSource().getMap("getUser", 64000000);
         System.out.println(map);
     }
 
@@ -70,6 +71,34 @@ public class Test {
         //拼装编码，然后从网易查询数据
         List<Map<String, Object>> list = ret.getList();
         System.out.println(list);
+    }
+
+    public static void createSql() {
+        int nDb = 3;
+        int nTable = 100;
+        int nStep = 1000000;
+        int nStart = 0;
+
+        String strSql = "CREATE TABLE tbUser{nTableIndex}\n" +
+                "(\n" +
+                "    lId INT(11) PRIMARY KEY NOT NULL COMMENT '主键' AUTO_INCREMENT,\n" +
+                "    strUsername VARCHAR(30),\n" +
+                "    nAge INT(6) COMMENT '年龄',\n" +
+                "    nSex INT(4) DEFAULT '3' COMMENT '1男2女3未知',\n" +
+                "    strMsg VARCHAR(150)\n" +
+                ") AUTO_INCREMENT={nStart} DEFAULT CHARSET=utf8;";
+
+        for (int i = 0; i < nDb; i++) {
+            for (int j = i * nTable; j < (i + 1) * nTable; j++) {
+                nStart = j * nStep;
+                String strSqlNew = strSql.replace("{nDbIndex}", i + "").replace("{nTableIndex}", j + "").replace("{nStart}", nStart + "");
+                System.out.println(strSqlNew);
+            }
+            System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+        }
+
+
     }
 
 

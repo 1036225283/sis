@@ -186,15 +186,14 @@ public class DataSource {
         String strDataSource = map.get("strDataSource").toString();
         String strDataGroup = map.get("strDataGroup").toString();
         String sql = map.get("strSql").toString();
+        String params = map.get("strParam").toString();
+        String[] arrKey = params.split(",");
 
         if (!"".equals(strDataGroup)) {
             strDataSource = getDataGroupDataSourceKeyFromArray(strDataSource, strDataGroup, arrParam);
-            String strTable = map.get("strTable").toString();
-            sql = getDataGroupSqlFromArray(strDataGroup, strTable, sql, arrParam);
+            sql = getDataGroupSqlFromArray(map, arrParam);
         }
 
-        String params = map.get("strParam").toString();
-        String[] arrKey = params.split(",");
 
         return UtilSql.getList(sql, getConnection(strDataSource), arrKey, arrParam);
 
@@ -233,15 +232,14 @@ public class DataSource {
         String strDataSource = map.get("strDataSource").toString();
         String strDataGroup = map.get("strDataGroup").toString();
         String sql = map.get("strSql").toString();
+        String params = map.get("strParam").toString();
+        String[] arrKey = params.split(",");
 
         if (!"".equals(strDataGroup)) {
             strDataSource = getDataGroupDataSourceKeyFromArray(strDataSource, strDataGroup, arrParam);
-            String strTable = map.get("strTable").toString();
-            sql = getDataGroupSqlFromArray(strDataGroup, strTable, sql, arrParam);
+            sql = getDataGroupSqlFromArray(map, arrParam);
         }
 
-        String params = map.get("strParam").toString();
-        String[] arrKey = params.split(",");
 
         return UtilSql.getUnique(sql, getConnection(strDataSource), arrKey, arrParam);
     }
@@ -280,16 +278,15 @@ public class DataSource {
         String strDataSource = map.get("strDataSource").toString();
         String strDataGroup = map.get("strDataGroup").toString();
         String sql = map.get("strSql").toString();
+        String params = map.get("strParam").toString();
+        String[] arrKey = params.split(",");
 
 
         if (!"".equals(strDataGroup)) {
             strDataSource = getDataGroupDataSourceKeyFromArray(strDataSource, strDataGroup, arrParam);
-            String strTable = map.get("strTable").toString();
-            sql = getDataGroupSqlFromArray(strDataGroup, strTable, sql, arrParam);
+            sql = getDataGroupSqlFromArray(map, arrParam);
         }
 
-        String params = map.get("strParam").toString();
-        String[] arrKey = params.split(",");
 
         return UtilSql.executeUpdate(sql, getConnection(strDataSource), arrKey, arrParam);
 
@@ -348,12 +345,25 @@ public class DataSource {
     }
 
 
-    private String getDataGroupSqlFromArray(String strDataGroup, String strTable, String sql, Object... arrParam) {
+    //根据指定的分片主键，计算表名，替换sql语句
+    private String getDataGroupSqlFromArray(Map<String, Object> map, Object... arrParam) {
+        String strDataGroup = map.get("strDataGroup").toString();
+        String sql = map.get("strSql").toString();
+        String params = map.get("strParam").toString();
+        String strTable = map.get("strTable").toString();
+        String[] arrKey = params.split(",");
         //strDataGroup = 5:100:50000:lUserId 意思是5库100表每
+
+
         String[] arrDataGroup = strDataGroup.split(":");
         int nCapacity = Integer.valueOf(arrDataGroup[2]);
 
-        String strKey = arrParam[0].toString();
+        //在这里需要根据参数列表
+        int nKeyIndex = findKeyIndex(arrKey, arrDataGroup[3]);
+        if (nKeyIndex == -1) {
+            throw new RuntimeException("没有找到分库分表的主键：" + map.toString());
+        }
+        String strKey = arrParam[nKeyIndex].toString();
         int nKey = Integer.valueOf(strKey);
 
         int nTableIndex = nKey / nCapacity;
@@ -405,6 +415,15 @@ public class DataSource {
         return basicDataSource;
     }
 
+
+    //从传递的参数中寻找分库分表主键的位置
+    private int findKeyIndex(String[] arrKey, String strKey) {
+        for (int i = 0; i < arrKey.length; i++) {
+            if (strKey.equals(arrKey[i])) ;
+            return i;
+        }
+        return -1;
+    }
 
     public static void setDataSource(DataSource dataSourceInt) {
         dataSource = dataSourceInt;
