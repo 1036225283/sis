@@ -1,5 +1,8 @@
 package sis;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +11,8 @@ import java.util.Map;
 
 public class UtilSql {
 
+
+    private static final Logger logger = LoggerFactory.getLogger(DataSource.class);
 
     /**
      * 获取map，填充key
@@ -222,8 +227,6 @@ public class UtilSql {
             System.out.println("getList : " + statement.toString());
             ResultSet resultSet = statement.executeQuery();// 执行语句，得到结果集
             return getList(resultSet);
-        } catch (Exception e) {
-            return null;
         } finally {
             connection.close();
         }
@@ -246,8 +249,6 @@ public class UtilSql {
             System.out.println("getMap : " + statement.toString());
             ResultSet resultSet = statement.executeQuery();// 执行语句，得到结果集
             return getUnique(resultSet);
-        } catch (Exception e) {
-            return null;
         } finally {
             connection.close();
         }
@@ -270,8 +271,6 @@ public class UtilSql {
 
             System.out.println("getMap : " + statement.toString());
             return statement.executeUpdate();
-        } catch (Exception e) {
-            return -1;
         } finally {
             connection.close();
         }

@@ -387,10 +387,6 @@ public class DataSource {
 
     //根据urls创建数据源
     public BasicDataSource createDataSource(Map<String, Object> map, String strKey, String strUrl) throws Exception {
-
-        List<BasicDataSource> listBasicDataSource = new ArrayList<BasicDataSource>();
-
-
         Properties properties = new Properties();
         properties.setProperty("username", map.get("strUsername").toString());
         properties.setProperty("password", map.get("strPassword").toString());
@@ -402,7 +398,7 @@ public class DataSource {
         properties.setProperty("initialSize", map.get("nInitialSize").toString());
         properties.setProperty("maxWaitMillis", map.get("nMaxWaitMillis").toString());
         properties.setProperty("testWhileIdle", "true");
-        properties.setProperty("timeBetweenEvictionRunsMillis", "10000");
+        properties.setProperty("timeBetweenEvictionRunsMillis", "300");
         properties.setProperty("numTestsPerEvictionRun", "3");
         properties.setProperty("removeAbandonedOnBorrow", "true");
         properties.setProperty("removeAbandonedOnMaintenance", "true");
@@ -410,6 +406,7 @@ public class DataSource {
         properties.setProperty("validationQuery", "SELECT 1");
         properties.setProperty("testOnReturn", "false");
         properties.setProperty("testOnBorrow", "true");
+        properties.setProperty("idleConnectionTestPeriod", "30");
         //分库分表时，多个数据源的处理 ,nDataGroup==1表示只有一个库
         BasicDataSource basicDataSource = BasicDataSourceFactory.createDataSource(properties);
         return basicDataSource;

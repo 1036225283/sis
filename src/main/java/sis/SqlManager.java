@@ -63,7 +63,10 @@ public class SqlManager implements Handler {
                         mapResult.put("strAction", strAction);
                         mapResult.put("strData", ok);
                         return new Return(0, "success", mapResult);
+                    } else {
+                        throw new RuntimeException("sql 的返回结果没有定义：list,map,int");
                     }
+
 
                 } catch (Exception e) {
                     return Return.Error(e.getMessage());

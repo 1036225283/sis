@@ -19,6 +19,7 @@ public class Test {
     }
 
     public static void main(String[] args) throws Exception {
+//        testBug();
         testSqlDataSource();
 //        testHandlerManager();
 //        testClientHandler();
@@ -71,6 +72,14 @@ public class Test {
         //拼装编码，然后从网易查询数据
         List<Map<String, Object>> list = ret.getList();
         System.out.println(list);
+    }
+
+    public static void testBug() throws Exception {
+
+        String strData = "000025,2018-10-23,26.9,26.86,27.58,26.5,27.16,-0.011046,3404847,9157";
+        int ok = DataSource.getDataSource().update("batchInsertStockDayFrom126", strData);
+
+
     }
 
     public static void createSql() {
