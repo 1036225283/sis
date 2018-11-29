@@ -20,11 +20,8 @@ public class Test {
 
     public static void main(String[] args) throws Exception {
 
-        DBHelper dbHelper= new DBHelper();
-        dbHelper.setUrl("read.user.service");
-        dbHelper.getConnection();
 //        testBug();
-//        testSqlDataSource();
+        testSqlDataSource();
 //        testHandlerManager();
 //        testClientHandler();
 //        testSqlManager();

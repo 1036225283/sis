@@ -84,7 +84,10 @@ public class DataSource {
                 for (String strUrl : arrUrl) {
                     logger.info(strKey + " : " + strUrl);
                     BasicDataSource basicDataSource = createDataSource(map, strKey, strUrl);
-                    listBasicDataSource.add(basicDataSource);
+                    if (basicDataSource != null) {
+                        listBasicDataSource.add(basicDataSource);
+                    }
+
                 }
                 mapDataSource.put(strKey, listBasicDataSource);
                 mapDataSourceIndex.put(strKey, new AtomicInteger(0));
@@ -98,7 +101,9 @@ public class DataSource {
                         String strRealUrl = strPrefix + i + strSuffix;
                         logger.info(strKeyNew + " : " + strRealUrl);
                         BasicDataSource basicDataSource = createDataSource(map, strKeyNew, strRealUrl);
-                        listBasicDataSource.add(basicDataSource);
+                        if (basicDataSource != null) {
+                            listBasicDataSource.add(basicDataSource);
+                        }
                     }
                     mapDataSource.put(strKeyNew, listBasicDataSource);
                     mapDataSourceIndex.put(strKeyNew, new AtomicInteger(0));
@@ -302,6 +307,9 @@ public class DataSource {
     public Connection getConnection(String strServiceName) throws Exception {
 
         List<BasicDataSource> list = mapDataSource.get(strServiceName);
+        if (list == null || list.size() == 0) {
+            throw new RuntimeException("dataSource name " + strServiceName + "not found");
+        }
 
         AtomicInteger index = mapDataSourceIndex.get(strServiceName);
 
@@ -386,30 +394,36 @@ public class DataSource {
 
 
     //根据urls创建数据源
-    public BasicDataSource createDataSource(Map<String, Object> map, String strKey, String strUrl) throws Exception {
-        Properties properties = new Properties();
-        properties.setProperty("username", map.get("strUsername").toString());
-        properties.setProperty("password", map.get("strPassword").toString());
-        properties.setProperty("url", strUrl);
-        properties.setProperty("driverClassName", map.get("strDriverClassName").toString());
-        properties.setProperty("minIdle", map.get("nMinIdle").toString());
-        properties.setProperty("maxIdle", map.get("nMaxIdle").toString());
-        properties.setProperty("maxTotal", map.get("nMaxTotal").toString());
-        properties.setProperty("initialSize", map.get("nInitialSize").toString());
-        properties.setProperty("maxWaitMillis", map.get("nMaxWaitMillis").toString());
-        properties.setProperty("testWhileIdle", "true");
-        properties.setProperty("timeBetweenEvictionRunsMillis", "300");
-        properties.setProperty("numTestsPerEvictionRun", "3");
-        properties.setProperty("removeAbandonedOnBorrow", "true");
-        properties.setProperty("removeAbandonedOnMaintenance", "true");
-        properties.setProperty("removeAbandonedTimeout", "300");
-        properties.setProperty("validationQuery", "SELECT 1");
-        properties.setProperty("testOnReturn", "false");
-        properties.setProperty("testOnBorrow", "true");
-        properties.setProperty("idleConnectionTestPeriod", "30");
-        //分库分表时，多个数据源的处理 ,nDataGroup==1表示只有一个库
-        BasicDataSource basicDataSource = BasicDataSourceFactory.createDataSource(properties);
-        return basicDataSource;
+    public BasicDataSource createDataSource(Map<String, Object> map, String strKey, String strUrl) {
+        try {
+            Properties properties = new Properties();
+            properties.setProperty("username", map.get("strUsername").toString());
+            properties.setProperty("password", map.get("strPassword").toString());
+            properties.setProperty("url", strUrl);
+            properties.setProperty("driverClassName", map.get("strDriverClassName").toString());
+            properties.setProperty("minIdle", map.get("nMinIdle").toString());
+            properties.setProperty("maxIdle", map.get("nMaxIdle").toString());
+            properties.setProperty("maxTotal", map.get("nMaxTotal").toString());
+            properties.setProperty("initialSize", map.get("nInitialSize").toString());
+            properties.setProperty("maxWaitMillis", map.get("nMaxWaitMillis").toString());
+            properties.setProperty("testWhileIdle", "true");
+            properties.setProperty("timeBetweenEvictionRunsMillis", "300");
+            properties.setProperty("numTestsPerEvictionRun", "3");
+            properties.setProperty("removeAbandonedOnBorrow", "true");
+            properties.setProperty("removeAbandonedOnMaintenance", "true");
+            properties.setProperty("removeAbandonedTimeout", "300");
+            properties.setProperty("validationQuery", "SELECT 1");
+            properties.setProperty("testOnReturn", "false");
+            properties.setProperty("testOnBorrow", "true");
+            properties.setProperty("idleConnectionTestPeriod", "30");
+            //分库分表时，多个数据源的处理 ,nDataGroup==1表示只有一个库
+            BasicDataSource basicDataSource = BasicDataSourceFactory.createDataSource(properties);
+            return basicDataSource;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
     }
 
 
