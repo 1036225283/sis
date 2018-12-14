@@ -28,6 +28,18 @@ public class Return {
         this.data = data;
     }
 
+    public static Return OK() {
+        return new Return(0);
+    }
+
+    public static Return OK(String msg) {
+        return new Return(0, msg);
+    }
+
+    public static Return OK(Map<String, Object> data) {
+        return new Return(0, "", data);
+    }
+
     public static Return Error() {
         return new Return(-1);
     }
@@ -36,6 +48,10 @@ public class Return {
         return new Return(-1, msg);
     }
 
+
+    public int getInt() {
+        return Integer.parseInt(data.get("strData").toString());
+    }
 
     public Map<String, Object> getMap() {
         return (Map<String, Object>) data.get("strData");

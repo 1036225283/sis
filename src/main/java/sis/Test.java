@@ -21,11 +21,94 @@ public class Test {
     public static void main(String[] args) throws Exception {
 
 //        testBug();
-        testSqlDataSource();
+//        testSqlDataSource();
 //        testHandlerManager();
 //        testClientHandler();
 //        testSqlManager();
-//        createSql();
+//        createUserSql();
+//        createUserLoginSql();
+//        testInsertUserLoginHistory();//插入用户登录记录
+        testUpdateUserLoginHistory();//更新用户登录记录
+    }
+
+
+    /**
+     * 1.创建表结构
+     * 2.创建数据源
+     *
+     * @throws Exception
+     */
+
+//    测试 数据的增，删，改，查
+
+
+    //测试分库分表后数据的增删改查
+    public static void testInsertUserLoginHistory() throws Exception {
+
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        int j = 1;
+        for (int i = 100000; i < 100010; i++) {
+            reqStock.put("strAction", "insertUserLoginHistory");
+            reqStock.put("lUserId", i);
+            reqStock.put("ip", "192.168.1." + j);
+            j++;
+
+            Return ret = HandlerClient.instance.handler(reqStock);
+            if (ret.getCode() != 0) {
+                System.out.println(ret.getMsg());
+            }
+
+            System.out.println(ret.getInt());
+        }
+
+
+    }
+
+    public static void testUpdateUserLoginHistory() throws Exception {
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        reqStock.put("strAction", "updateUserLoginHistory");
+        reqStock.put("lUserId", 100009);
+        reqStock.put("lId", 1000000010);
+        reqStock.put("ip", "192.168.1.32");
+
+        Return ret = HandlerClient.instance.handler(reqStock);
+        if (ret.getCode() != 0) {
+            System.out.println(ret.getMsg());
+        }
+
+        System.out.println(ret.getInt());
+    }
+
+    public static void testDeleteUserLoginHistory() throws Exception {
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        reqStock.put("strAction", "limitStockExtend");
+        reqStock.put("strFlag", "nDayInfoFlag");
+        reqStock.put("strValue", 0);
+        reqStock.put("limit", 30);
+        Return ret = HandlerClient.instance.handler(reqStock);
+        if (ret.getCode() != 0) {
+            System.out.println(ret.getMsg());
+        }
+
+        //拼装编码，然后从网易查询数据
+        List<Map<String, Object>> list = ret.getList();
+        System.out.println(list);
+    }
+
+    public static void testSelectUserLoginHistory() throws Exception {
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        reqStock.put("strAction", "limitStockExtend");
+        reqStock.put("strFlag", "nDayInfoFlag");
+        reqStock.put("strValue", 0);
+        reqStock.put("limit", 30);
+        Return ret = HandlerClient.instance.handler(reqStock);
+        if (ret.getCode() != 0) {
+            System.out.println(ret.getMsg());
+        }
+
+        //拼装编码，然后从网易查询数据
+        List<Map<String, Object>> list = ret.getList();
+        System.out.println(list);
     }
 
     public static void testSqlDataSource() throws Exception {
@@ -83,10 +166,11 @@ public class Test {
 
     }
 
-    public static void createSql() {
+    //用户表
+    public static void createUserSql() {
         int nDb = 3;
         int nTable = 100;
-        int nStep = 1000000;
+        int nStep = 1000000;//表自增步长
         int nStart = 0;
 
         String strSql = "CREATE TABLE tbUser{nTableIndex}\n" +
@@ -100,7 +184,43 @@ public class Test {
 
         for (int i = 0; i < nDb; i++) {
             for (int j = i * nTable; j < (i + 1) * nTable; j++) {
-                nStart = j * nStep;
+                nStart = j * nStep;//表自增起始点
+                String strSqlNew = strSql.replace("{nDbIndex}", i + "").replace("{nTableIndex}", j + "").replace("{nStart}", nStart + "");
+                System.out.println(strSqlNew);
+            }
+            System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+        }
+
+
+    }
+
+
+    //
+
+    /**
+     * 用户登录记录
+     * 根据用户id来分，假定每个用户登录记录100条，那么一个表容纳的用户数 = 1000000/100 = 10000
+     */
+    public static void createUserLoginSql() {
+        int nDb = 3;
+        int nTable = 100;
+        long nStep = 100000000;//表自增步长
+        long nStart = 0;
+
+        String strSql = "CREATE TABLE tbUserLoginHistory{nTableIndex}\n" +
+                "(\n" +
+                "    lId BIGINT(20) UNSIGNED PRIMARY KEY NOT NULL COMMENT '主键' AUTO_INCREMENT,\n" +
+                "    lUserId BIGINT(20) UNSIGNED NOT NULL COMMENT '用户id',\n" +
+                "    ip VARCHAR(30) COMMENT 'ip地址',\n" +
+                "    dtCreateTime DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',\n" +
+                "    dtModifyTime DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间'\n" +
+                ")COMMENT='用户登录历史表' default charset=utf8 COLLATE='utf8_bin' ENGINE=InnoDB AUTO_INCREMENT={nStart};\n" +
+                "\n";
+
+        for (int i = 0; i < nDb; i++) {
+            for (int j = i * nTable; j < (i + 1) * nTable; j++) {
+                nStart = j * nStep;//表自增起始点
                 String strSqlNew = strSql.replace("{nDbIndex}", i + "").replace("{nTableIndex}", j + "").replace("{nStart}", nStart + "");
                 System.out.println(strSqlNew);
             }

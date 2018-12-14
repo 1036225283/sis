@@ -18,6 +18,7 @@ public class DataSource {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSource.class);
     private DBHelper dbHelper = new DBHelper();
+//    private ThreadLocal<>
 
 
     static DataSource dataSource = new DataSource();
