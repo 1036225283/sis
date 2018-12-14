@@ -1,5 +1,6 @@
 package sis;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +37,11 @@ public class Return {
         return new Return(0, msg);
     }
 
-    public static Return OK(Map<String, Object> data) {
-        return new Return(0, "", data);
+
+    public static Return OK(Object data) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("strData", data);
+        return new Return(0, "", map);
     }
 
     public static Return Error() {
