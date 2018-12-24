@@ -18,7 +18,7 @@ public class DataSource {
 
     private static final Logger logger = LoggerFactory.getLogger(DataSource.class);
     private DBHelper dbHelper = new DBHelper();
-//    private ThreadLocal<>
+    private ThreadLocal<Map<String, Object>> threadLocal = new ThreadLocal<Map<String, Object>>();
 
 
     static DataSource dataSource = new DataSource();
@@ -307,6 +307,11 @@ public class DataSource {
     //一主多从时多个数据源连接的获取，采用轮询策略
     public Connection getConnection(String strServiceName) throws Exception {
 
+        Map<String, Object> mapThread = threadLocal.get();
+        if (mapThread == null) {
+            mapThread = new HashMap<String, Object>();
+        }
+
         List<BasicDataSource> list = mapDataSource.get(strServiceName);
         if (list == null || list.size() == 0) {
             throw new RuntimeException("dataSource name " + strServiceName + "not found");
@@ -441,4 +446,15 @@ public class DataSource {
         dataSource = dataSourceInt;
     }
 
+
+    public void setAutCommit() {
+
+        Map<String, Object> mapThread = threadLocal.get();
+        if (mapThread == null) {
+            mapThread = new HashMap<String, Object>();
+        }
+
+        mapThread.put("autoCommit", false);
+
+    }
 }
