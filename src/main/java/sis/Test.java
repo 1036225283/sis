@@ -20,9 +20,9 @@ public class Test {
 
     public static void main(String[] args) throws Exception {
 //        testBug();
-        testSqlDataSource();
+//        testSqlDataSource();
 //        testHandlerManager();
-//        testClientHandler();
+        testClientHandler();
 //        testSqlManager();
 //        createSql();
     }
@@ -30,7 +30,7 @@ public class Test {
     public static void testSqlDataSource() throws Exception {
 //        List<Map<String, Object>> list = DataSource.getDataSource().getList("getUser", );
 //        System.out.println(list.size());
-        Map<String, Object> map = DataSource.getDataSource().getMap("getUser", 64000000);
+        Map<String, Object> map = DataSource.getDataSource().getMap("loadTasks");
         System.out.println(map);
     }
 
@@ -52,9 +52,20 @@ public class Test {
 
     public static void testClientHandler() {
         Map<String, Object> reqStock = new HashMap<String, Object>();
-        reqStock.put("strAction", "listTaskUser");
+        reqStock.put("strAction", "loadTasks");
+
+        System.out.println("before modify ... ");
+        Map<String, Object> sqlMap = HandlerClient.instance.SqlManager().sqlMap("loadTasks");
+        System.out.println(sqlMap);
+        System.out.println(HandlerClient.instance.SqlManager().sql("loadTasks"));
+
+        System.out.println("after modify ... ");
+        HandlerClient.instance.SqlManager().modify("loadTasks", "SELECT * FROM tbTask", null);
+
         Return ret = HandlerClient.instance.handler(reqStock);
-        System.out.println(ret.getList());
+        if (ret != null && ret.getCode() != 0) {
+            System.out.println(ret.getList());
+        }
     }
 
 

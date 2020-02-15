@@ -303,7 +303,14 @@ public class DataSource {
 
         List<BasicDataSource> list = mapDataSource.get(strServiceName);
 
+        if (list == null) {
+            throw new RuntimeException("DataSource do not found , strServiceName = " + strServiceName);
+        }
+
         AtomicInteger index = mapDataSourceIndex.get(strServiceName);
+        if (index == null) {
+            throw new RuntimeException("mapDataSourceIndex is null , strServiceName = " + strServiceName);
+        }
 
         if (index.addAndGet(1) < list.size()) {
             return list.get(index.get()).getConnection();
