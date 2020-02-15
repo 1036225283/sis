@@ -23,12 +23,12 @@ public class Test {
 //        testBug();
 //        testSqlDataSource();
 //        testHandlerManager();
-//        testClientHandler();
+        testClientHandler();
 //        testSqlManager();
 //        createUserSql();
 //        createUserLoginSql();
 //        testInsertUserLoginHistory();//插入用户登录记录
-        testUpdateUserLoginHistory();//更新用户登录记录
+//        testUpdateUserLoginHistory();//更新用户登录记录
     }
 
 
@@ -136,9 +136,20 @@ public class Test {
 
     public static void testClientHandler() {
         Map<String, Object> reqStock = new HashMap<String, Object>();
-        reqStock.put("strAction", "listTaskUser");
+        reqStock.put("strAction", "loadTasks");
+
+        System.out.println("before modify ... ");
+        Map<String, Object> sqlMap = HandlerClient.instance.SqlManager().sqlMap("loadTasks");
+        System.out.println(sqlMap);
+        System.out.println(HandlerClient.instance.SqlManager().sql("loadTasks"));
+
+        System.out.println("after modify ... ");
+        HandlerClient.instance.SqlManager().modify("loadTasks", "SELECT * FROM tbTask", null);
+
         Return ret = HandlerClient.instance.handler(reqStock);
-        System.out.println(ret.getList());
+        if (ret != null && ret.getCode() != 0) {
+            System.out.println(ret.getList());
+        }
     }
 
 

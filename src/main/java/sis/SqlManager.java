@@ -75,4 +75,39 @@ public class SqlManager implements Handler {
         }
         return null;
     }
+
+    public boolean modify(String strAction, String sql, String param) {
+        Map<String, Object> sqlMap = sqlMap(strAction);
+        if (sqlMap == null) {
+            return false;
+        }
+
+        sqlMap.put("strSql", sql);
+
+        if (param == null) {
+            sqlMap.put("strParam", "");
+        } else {
+            sqlMap.put("strParam", param);
+        }
+
+        return true;
+    }
+
+    public Map<String, Object> sqlMap(String strAction) {
+        return services.get(strAction);
+    }
+
+
+    public String sql(String strAction) {
+        Map<String, Object> sqlMap = sqlMap(strAction);
+        if (sqlMap == null) {
+            return null;
+        }
+
+        if (sqlMap.containsKey("strSql")) {
+            return sqlMap.get("strSql").toString();
+        }
+
+        return null;
+    }
 }

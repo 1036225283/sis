@@ -40,6 +40,17 @@ public class HandlerClient implements Handler {
 
     }
 
+    public SqlManager SqlManager() {
+        return SqlManager.instance;
+    }
+
+    public HandlerManager HandlerManager() {
+        return HandlerManager.instance;
+    }
+
+    public ServiceManager ServiceManager() {
+        return ServiceManager.instance;
+    }
 
     public void setLogger(Logger logger) {
         this.logger = logger;
