@@ -23,12 +23,18 @@ public class Test {
 //        testBug();
 //        testSqlDataSource();
 //        testHandlerManager();
-        testClientHandler();
+//        testClientHandler();
 //        testSqlManager();
 //        createUserSql();
 //        createUserLoginSql();
 //        testInsertUserLoginHistory();//插入用户登录记录
 //        testUpdateUserLoginHistory();//更新用户登录记录
+//        test();
+    }
+
+
+    public static void testReturn() {
+        Return ret = new Return(12);
     }
 
 
@@ -58,7 +64,7 @@ public class Test {
                 System.out.println(ret.getMsg());
             }
 
-            System.out.println(ret.getInt());
+            System.out.println(ret.count());
         }
 
 
@@ -76,7 +82,7 @@ public class Test {
             System.out.println(ret.getMsg());
         }
 
-        System.out.println(ret.getInt());
+        System.out.println(ret.count());
     }
 
     public static void testDeleteUserLoginHistory() throws Exception {
@@ -91,7 +97,7 @@ public class Test {
         }
 
         //拼装编码，然后从网易查询数据
-        List<Map<String, Object>> list = ret.getList();
+        List<Map<String, Object>> list = ret.list();
         System.out.println(list);
     }
 
@@ -107,7 +113,7 @@ public class Test {
         }
 
         //拼装编码，然后从网易查询数据
-        List<Map<String, Object>> list = ret.getList();
+        List<Map<String, Object>> list = ret.list();
         System.out.println(list);
     }
 
@@ -148,7 +154,7 @@ public class Test {
 
         Return ret = HandlerClient.instance.handler(reqStock);
         if (ret != null && ret.getCode() != 0) {
-            System.out.println(ret.getList());
+            System.out.println(ret.list());
         }
     }
 
@@ -165,7 +171,7 @@ public class Test {
         }
 
         //拼装编码，然后从网易查询数据
-        List<Map<String, Object>> list = ret.getList();
+        List<Map<String, Object>> list = ret.list();
         System.out.println(list);
     }
 
@@ -240,6 +246,22 @@ public class Test {
         }
 
 
+    }
+
+    public static void test() {
+        Map<String, Object> mapReq = new HashMap();
+
+        //先删数据
+        mapReq.put("strAction", "test");
+        mapReq.put("strName", "大乔");
+        mapReq.put("strTitle", "呵呵");
+
+        Return ret = HandlerClient.instance.handler(mapReq);
+        if (ret.getCode() != 0) {
+            System.out.println("出错了: " + ret.getMsg());
+        } else {
+            System.out.println("更新" + 000000 + "题材成功");
+        }
     }
 
 

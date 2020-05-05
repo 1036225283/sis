@@ -53,15 +53,15 @@ public class Return {
     }
 
 
-    public int getInt() {
+    public int count() {
         return Integer.parseInt(data.get("strData").toString());
     }
 
-    public Map<String, Object> getMap() {
+    public Map<String, Object> map() {
         return (Map<String, Object>) data.get("strData");
     }
 
-    public List<Map<String, Object>> getList() {
+    public List<Map<String, Object>> list() {
         return (List<Map<String, Object>>) data.get("strData");
     }
 
