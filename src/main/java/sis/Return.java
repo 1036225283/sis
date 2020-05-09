@@ -1,5 +1,6 @@
 package sis;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,64 +9,47 @@ import java.util.Map;
  * Created by root on 2018/8/25.
  */
 public class Return {
-    private int code = 0;
+    private int code;
     private String msg;
-    private String action;
-    private String clientId;
     private Map<String, Object> data;
 
 
-    public Return(String strAction, String strClientId) {
-        action = strAction;
-        clientId = strClientId;
+    public Return(int code) {
+        this.code = code;
     }
 
-    public Return(String strAction, String strClientId, int nCode) {
-        action = strAction;
-        clientId = strClientId;
-        code = nCode;
+    public Return(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
     }
 
-    public Return(String strAction, String strClientId, int nCode, String strMsg) {
-        action = strAction;
-        clientId = strClientId;
-        code = nCode;
-        msg = strMsg;
+    public Return(int code, String msg, Map<String, Object> data) {
+        this.code = code;
+        this.msg = msg;
+        this.data = data;
     }
 
-    public Return(String strAction, String strClientId, int nCode, String strMsg, Map<String, Object> mapData) {
-        action = strAction;
-        clientId = strClientId;
-        code = nCode;
-        msg = strMsg;
-        data = mapData;
+    public static Return OK() {
+        return new Return(0);
+    }
+
+    public static Return OK(String msg) {
+        return new Return(0, msg);
     }
 
 
-    public static Return OK(String strAction, String strClientId) {
-        return new Return(strAction, strClientId);
+    public static Return OK(Object data) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("strData", data);
+        return new Return(0, "", map);
     }
 
-    public static Return OK(String strAction, String strClientId, String strMsg) {
-        return new Return(strAction, strClientId, 0, strMsg);
+    public static Return Error() {
+        return new Return(-1);
     }
 
-
-    public static Return OK(String strAction, String strClientId, String strMsg, Map<String, Object> data) {
-        return new Return(strAction, strClientId, 0, strMsg, data);
-    }
-
-
-    public static Return Error(String strAction, String strClientId) {
-        return new Return(strAction, strClientId, -1);
-    }
-
-    public static Return Error(String strAction, String strClientId, String strMsg) {
-        return new Return(strAction, strClientId, 0, strMsg);
-    }
-
-    public static Return Error(String strAction, String strClientId, String strMsg, Map<String, Object> data) {
-        return new Return(strAction, strClientId, 0, strMsg, data);
+    public static Return Error(String msg) {
+        return new Return(-1, msg);
     }
 
 
@@ -103,21 +87,5 @@ public class Return {
 
     public void setData(Map<String, Object> data) {
         this.data = data;
-    }
-
-    public String getAction() {
-        return action;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
     }
 }
