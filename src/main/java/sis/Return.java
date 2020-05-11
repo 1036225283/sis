@@ -11,6 +11,7 @@ import java.util.Map;
 public class Return {
     private int code;
     private String msg;
+    private String action;
     private Map<String, Object> data;
 
 
@@ -61,6 +62,11 @@ public class Return {
         return (Map<String, Object>) data.get("strData");
     }
 
+    public Return map(Map<String, Object> map) {
+        data = map;
+        return this;
+    }
+
     public List<Map<String, Object>> list() {
         return (List<Map<String, Object>>) data.get("strData");
     }
@@ -87,5 +93,14 @@ public class Return {
 
     public void setData(Map<String, Object> data) {
         this.data = data;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public Return action(String action) {
+        this.action = action;
+        return this;
     }
 }
