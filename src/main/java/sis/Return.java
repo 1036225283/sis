@@ -12,7 +12,7 @@ public class Return {
     private int code;
     private String msg;
     private String action;
-    private Map<String, Object> data;
+    private Object data;
 
 
     public Return(int code) {
@@ -54,12 +54,13 @@ public class Return {
     }
 
 
-    public int count() {
-        return Integer.parseInt(data.get("strData").toString());
+    public long count() {
+        Map<String, Long> map = (Map<String, Long>) data;
+        return map.get("count");
     }
 
     public Map<String, Object> map() {
-        return (Map<String, Object>) data.get("strData");
+        return (Map<String, Object>) data;
     }
 
     public Return map(Map<String, Object> map) {
@@ -68,7 +69,21 @@ public class Return {
     }
 
     public List<Map<String, Object>> list() {
-        return (List<Map<String, Object>>) data.get("strData");
+        return (List<Map<String, Object>>) data;
+    }
+
+    public Return list(List<Map<String, Object>> list) {
+        data = list;
+        return this;
+    }
+
+    public Object data() {
+        return data;
+    }
+
+    public Return data(Object o) {
+        data = o;
+        return this;
     }
 
     public int getCode() {
@@ -87,13 +102,6 @@ public class Return {
         this.msg = msg;
     }
 
-    public Map<String, Object> getData() {
-        return data;
-    }
-
-    public void setData(Map<String, Object> data) {
-        this.data = data;
-    }
 
     public String getAction() {
         return action;

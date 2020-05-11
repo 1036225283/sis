@@ -30,8 +30,50 @@ public class Test {
 //        testInsertUserLoginHistory();//插入用户登录记录
 //        testUpdateUserLoginHistory();//更新用户登录记录
 //        test();
+
+//        testCountUser();
+//        testListUser();
+//        testUser();
+        Map<String, Object> map = DataSource.getDataSource().getMap("countStockTrainData", "000001", "2020-05-20", 6, 1);
+        System.out.println(map);
     }
 
+    public static void testCountUser() {
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        reqStock.put("strAction", "countUser");
+
+        Return ret = HandlerClient.instance.handler(reqStock);
+        if (ret.getCode() != 0) {
+            System.out.println(ret.getMsg());
+        }
+
+        System.out.println(ret.count());
+    }
+
+    public static void testListUser() {
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        reqStock.put("strAction", "listUser");
+
+        Return ret = HandlerClient.instance.handler(reqStock);
+        if (ret.getCode() != 0) {
+            System.out.println(ret.getMsg());
+        }
+
+        System.out.println(ret.list());
+    }
+
+    public static void testUser() {
+        Map<String, Object> reqStock = new HashMap<String, Object>();
+        reqStock.put("strAction", "getUserByUserId");
+        reqStock.put("lUserId", 1);
+
+        Return ret = HandlerClient.instance.handler(reqStock);
+        if (ret.getCode() != 0) {
+            System.out.println(ret.getMsg());
+        }
+
+        System.out.println(ret.map());
+    }
 
     public static void testReturn() {
         Return ret = new Return(12);

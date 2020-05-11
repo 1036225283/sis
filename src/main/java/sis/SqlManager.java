@@ -45,24 +45,15 @@ public class SqlManager implements Handler {
                     }
 
 
-                    Map<String, Object> mapResult = new HashMap<String, Object>();
-
-
                     if (strResultType.equals("list")) {
                         List<Map<String, Object>> list = DataSource.getDataSource().getList(strAction, objects);
-                        mapResult.put("strAction", strAction);
-                        mapResult.put("strData", list);
-                        return new Return(0, "success", mapResult);
+                        return Return.OK().action(strAction).data(list);
                     } else if (strResultType.equals("map")) {
                         Map<String, Object> mapSqlResult = DataSource.getDataSource().getMap(strAction, objects);
-                        mapResult.put("strAction", strAction);
-                        mapResult.put("strData", mapSqlResult);
-                        return new Return(0, "success", mapResult);
+                        return Return.OK().action(strAction).data(mapSqlResult);
                     } else if (strResultType.equals("int")) {
                         int ok = DataSource.getDataSource().update(strAction, objects);
-                        mapResult.put("strAction", strAction);
-                        mapResult.put("strData", ok);
-                        return new Return(0, "success", mapResult);
+                        return Return.OK().action(strAction).data(ok);
                     } else {
                         throw new RuntimeException("sql 的返回结果没有定义：list,map,int");
                     }
