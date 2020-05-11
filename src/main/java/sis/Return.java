@@ -77,7 +77,7 @@ public class Return {
         return this;
     }
 
-    public Object data() {
+    public Object getData() {
         return data;
     }
 
