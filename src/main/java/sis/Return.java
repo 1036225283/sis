@@ -54,9 +54,8 @@ public class Return {
     }
 
 
-    public long count() {
-        Map<String, Long> map = (Map<String, Long>) data;
-        return map.get("count");
+    public int count() {
+        return (Integer) data;
     }
 
     public Map<String, Object> map() {

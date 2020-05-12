@@ -34,8 +34,20 @@ public class Test {
 //        testCountUser();
 //        testListUser();
 //        testUser();
-        Map<String, Object> map = DataSource.getDataSource().getMap("countStockTrainData", "000001", "2020-05-20", 6, 1);
-        System.out.println(map);
+        testInserUser();
+    }
+
+    public static void testInserUser() {
+        Map<String, Object> reqStock = new HashMap();
+        reqStock.put("strAction", "insertUser");
+        reqStock.put("strPhone", "12312312312s3");
+        reqStock.put("strEmail", "sfasf");
+        reqStock.put("strPass", "sdfas");
+        Return ret = HandlerClient.instance.handler(reqStock);
+        if (ret.getCode() != 0) {
+            throw new RuntimeException(ret.getMsg());
+        }
+        System.out.println(ret.count());
     }
 
     public static void testCountUser() {
