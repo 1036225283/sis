@@ -201,12 +201,8 @@ public class UtilSql {
         List<Map<String, Object>> list = getList(resultSet);
         if (list.size() == 0) {
             return null;
-        } else if (list.size() == 1) {
-            return list.get(0);
-        } else {
-            return null;
-            // throw new RuntimeException("查询的数据不唯一");
         }
+        return list.get(0);
     }
 
     //进行预编译的处理
